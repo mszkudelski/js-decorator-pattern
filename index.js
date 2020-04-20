@@ -14,19 +14,27 @@ function Log(message) {
     const originalFunction = descriptor.value;
     descriptor.value = function(...args) {
       LoggerService.log(message, ...args);
-      return originalFunction.bind(target)(...args);
+      return originalFunction.call(target, ...args); 
     };
     return descriptor;
   };
 }
 
 class Cart {
+  constructor() {
+    this.products = [];
+  }
   @Log("Product added!")
-  addProduct(productName, quantity) {}
+  addProduct(productName, quantity) {
+    console.log(this)
+    this.products.push({ productName, quantity });
+  }
 }
 
-new Cart().addProduct("Bread", 12);
-new Cart().addProduct("Eggs", 2);
+const cart = new Cart();
+
+cart.addProduct("Bread", 12);
+cart.addProduct("Eggs", 2);
 
 // Plain ES5 Example
 
@@ -40,16 +48,21 @@ function LogES5(message) {
     const originalFunction = descriptor.value;
     descriptor.value = function(...args) {
       LoggerService.log(message, ...args);
-      return originalFunction.bind(target)(...args);
+      return originalFunction(...args);
     };
     return descriptor;
   };
 }
 
-const cart = {
-  addProduct(productName, quantity) {}
-};
+function CartES5() {
+  this.products= [];
+  this.addProduct = (productName, quantity) => {
+    this.products.push({ productName, quantity });
+  }
+}
 
-decorate(cart, "addProduct", LogES5("Product added in ES5!"));
+const cartES5 = new CartES5();
 
-cart.addProduct("ES5 Bread", 6);
+decorate(cartES5, "addProduct", LogES5("Product added in ES5!"));
+
+cartES5.addProduct("ES5 Bread", 6);
