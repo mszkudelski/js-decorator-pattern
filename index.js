@@ -9,24 +9,25 @@ const LoggerService = {
   log: console.log
 };
 
+// === Modern decorator solution ===
+
 function Log(message) {
   return function(target, propertyKey, descriptor) {
     const originalFunction = descriptor.value;
     descriptor.value = function(...args) {
       LoggerService.log(message, ...args);
-      return originalFunction.call(target, ...args); 
+      return originalFunction.call(this, ...args); 
     };
     return descriptor;
   };
 }
 
 class Cart {
-  constructor() {
-    this.products = [];
-  }
+  products = [];
+
+  method( ){}
   @Log("Product added!")
   addProduct(productName, quantity) {
-    console.log(this)
     this.products.push({ productName, quantity });
   }
 }
@@ -36,7 +37,7 @@ const cart = new Cart();
 cart.addProduct("Bread", 12);
 cart.addProduct("Eggs", 2);
 
-// Plain ES5 Example
+// === Plain ES5 Example ===
 
 function decorate(target, property, callback) {
   const descriptor = Object.getOwnPropertyDescriptor(target, property);
@@ -65,4 +66,4 @@ const cartES5 = new CartES5();
 
 decorate(cartES5, "addProduct", LogES5("Product added in ES5!"));
 
-cartES5.addProduct("ES5 Bread", 6);
+cartES5.addProduct("Bread", 6);
